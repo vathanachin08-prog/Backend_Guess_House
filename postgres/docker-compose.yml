@@ -9,7 +9,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=1234
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=content_management_db
+      - POSTGRES_DB=room_rental_db
     networks:
       - cf-cms-service
 

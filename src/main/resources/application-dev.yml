@@ -4,11 +4,11 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/mobile_ii_203_db
+    url: jdbc:postgresql://localhost:5432/room_rental_db
     username: postgres
     password: 1234
 
-  jpa:
+  jpa: 
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

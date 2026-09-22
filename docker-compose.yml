@@ -11,7 +11,7 @@ services:
     environment:
       - SERVER_PORT=30033
       - SPRING_UPLOAD_SERVER_PATH=/app/upload/images/
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-content-management-service:5432/content_management_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-content-management-service:5432/room_rental_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=1234
     volumes:

@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:54322/content_management_db
+    url: jdbc:postgresql://localhost:54322/room_rental_db
     username: postgres
     password: 1234
 
