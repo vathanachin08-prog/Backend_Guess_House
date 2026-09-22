@@ -1,0 +1,39 @@
+services:
+  # ── CMS Service ──────────────────────────────────
+  content-management-service:
+    container_name: content-management-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: content-management-service:v1.0.0
+    ports:
+      - "30033:30033"
+    environment:
+      - SERVER_PORT=30033
+      - SPRING_UPLOAD_SERVER_PATH=/app/upload/images/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-content-management-service:5432/content_management_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+    volumes:
+      - ./upload/images:/app/upload/images
+    networks:
+      - cf-cms-service
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:30033/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 700M
+        reservations:
+          cpus: '0.25'
+          memory: 350M
+
+networks:
+  cf-cms-service:
+    name: cf-cms-service
