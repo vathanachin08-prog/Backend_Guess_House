@@ -336,8 +336,14 @@ public class AuthController {
             }
             User user = new User(req.getUsername(), req.getEmail(), encoder.encode(req.getPassword()), req.getPhoneNumber());
             Set<Role> roles = new HashSet<>();
-            Role role = null;
-            if (req.getRole().equals(UserRole.ROLE_USER) || req.getRole().equals("USER")) {
+            Role role;
+            if ("OWNER".equalsIgnoreCase(req.getRole()) || "ROLE_OWNER".equalsIgnoreCase(req.getRole())) {
+                role = roleRepository.findByName(UserRole.ROLE_OWNER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            } else if ("STUDENT".equalsIgnoreCase(req.getRole()) || "ROLE_STUDENT".equalsIgnoreCase(req.getRole())) {
+                role = roleRepository.findByName(UserRole.ROLE_STUDENT).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            } else if ("ADMIN".equalsIgnoreCase(req.getRole()) || "ROLE_ADMIN".equalsIgnoreCase(req.getRole())) {
+                role = roleRepository.findByName(UserRole.ROLE_ADMIN).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            } else {
                 role = roleRepository.findByName(UserRole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             }
             roles.add(role);

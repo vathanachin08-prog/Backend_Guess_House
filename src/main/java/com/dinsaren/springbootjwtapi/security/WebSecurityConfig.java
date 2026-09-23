@@ -83,13 +83,16 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/error",
                                 "/api/oauth/**",
                                 "/api/public/**",
                                 "/openapi/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
+                                "/v3/api-docs",
                                 "/v3/api-docs/**",
                                 "/webjars/**",
+                                "/actuator/health",
                                 "/actuator/health/**"
                         ).permitAll()
                         .anyRequest().authenticated()

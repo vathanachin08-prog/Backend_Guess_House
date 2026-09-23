@@ -10,4 +10,6 @@ public enum UserRole {
     ROLE_MERCHANT,
     ROLE_CREATOR,
     ROLE_REVIEWER,
+    ROLE_OWNER,
+    ROLE_STUDENT,
 }

@@ -80,3 +80,68 @@ It does not manage `postgres/docker-compose.yml` — the database is expected to
   - Renew Access Token
   - Auto Logout
 
+## Rental Marketplace Domain (Phase 1)
+
+A rental marketplace designed for university students to find safe, trusted rental rooms and for property owners to list and manage rental accommodations.
+
+### User Roles
+- `ROLE_STUDENT`: Free student user. Can search/filter rooms, save favorites, submit visit requests, write reviews, and report properties.
+- `ROLE_OWNER`: Property owner. Can register properties, create/update rooms, attach facilities, set pricing/availability, and manage visit requests.
+- `ROLE_ADMIN`: Platform admin. Can verify/reject properties, manage reports, and inspect all platform data.
+
+### Main Endpoints
+
+#### 1. Public Endpoints (No Auth Required)
+- `GET /api/public/properties` — Search published & verified properties (filters: `keyword`, `city`, `district`, `minPrice`, `maxPrice`, `roomType`, `available`, `facility`, `page`, `size`)
+- `GET /api/public/properties/{id}` — View property details with available rooms
+- `GET /api/public/properties/{propertyId}/reviews` — List reviews for a property
+- `GET /api/public/rooms/{id}` — View individual room details and facilities
+
+#### 2. Property & Room Management (Owner)
+- `POST /api/app/properties` — Create a new property listing
+- `GET /api/app/properties/{id}` — Get property details
+- `PUT /api/app/properties/{id}` — Update property (owner verification enforced)
+- `DELETE /api/app/properties/{id}` — Delete property (owner verification enforced)
+- `GET /api/app/properties/my` — List properties owned by the authenticated owner
+- `POST /api/app/properties/{propertyId}/rooms` — Add room to property
+- `GET /api/app/properties/{propertyId}/rooms` — List rooms in a property
+- `PUT /api/app/rooms/{id}` — Update room details and facilities
+- `DELETE /api/app/rooms/{id}` — Delete room
+
+#### 3. Favorites (Student)
+- `POST /api/app/favorites` — Save a property or room as favorite (`{ "propertyId": 1 }` or `{ "roomId": 2 }`)
+- `DELETE /api/app/favorites/{id}` — Remove from favorites
+- `GET /api/app/favorites` — List current student's favorites
+
+#### 4. Visit Requests (Student & Owner)
+- `POST /api/app/visit-requests` — Submit visit request (`propertyId`, `roomId`, `requestedDate`, `requestedTime`, `message`)
+- `GET /api/app/visit-requests/my` — Student views their visit requests
+- `GET /api/app/owner/visit-requests/{propertyId}` — Owner views visit requests for their property
+- `PUT /api/app/visit-requests/{id}/accept` — Owner accepts request
+- `PUT /api/app/visit-requests/{id}/reject` — Owner rejects request
+- `PUT /api/app/visit-requests/{id}/cancel` — Student cancels pending request
+- `PUT /api/app/visit-requests/{id}/complete` — Owner marks visit as completed
+
+#### 5. Reviews (Student)
+- `POST /api/app/properties/{propertyId}/reviews` — Submit review (`rating` 1-5, `comment`)
+- `PUT /api/app/reviews/{id}` — Update own review
+- `DELETE /api/app/reviews/{id}` — Delete own review
+
+#### 6. Reports & Admin
+- `POST /api/app/properties/{propertyId}/reports` — Student reports a property (`reason`, `description`)
+- `GET /api/admin/reports` — Admin lists reports (filter by `status`)
+- `PUT /api/admin/reports/{id}` — Admin updates report status (`PENDING`, `REVIEWING`, `RESOLVED`, `REJECTED`)
+- `PUT /api/admin/properties/{id}/verify` — Admin verifies property (`PENDING`, `VERIFIED`, `REJECTED`)
+
+### Database Migration
+The rental domain schema is managed via Flyway migration:
+- `src/main/resources/db/migration/V3__create_rental_domain_tables.sql`
+  - Creates tables: `facilities`, `properties`, `rooms`, `room_facilities`, `favorites`, `visit_requests`, `reviews`, `reports`.
+  - Seeds roles (`ROLE_OWNER`, `ROLE_STUDENT`) and standard facilities.
+
+### Running Tests
+```bash
+./gradlew test
+```
+
+
