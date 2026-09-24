@@ -27,42 +27,49 @@ public class UploadFileServiceImpl implements UploadFileService {
     @Override
     public UploadImageRes uploadFile(MultipartFile files) {
 
-        if (files.isEmpty()) {
+        if (files == null || files.isEmpty()) {
             log.error("Failed to store empty file");
+            return new UploadImageRes();
         }
 
-        String writePath = serverPath;
-
-        File file = new File(writePath);
-        if (!file.exists()) {
-            file.mkdirs();
+        File uploadDir = new File(serverPath).getAbsoluteFile();
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
         }
 
         UploadImageRes imageRes = new UploadImageRes();
-        String name = StringUtils.cleanPath(files.getOriginalFilename());
+        String originalFilename = files.getOriginalFilename() != null ? files.getOriginalFilename() : "image.jpg";
+        String name = StringUtils.cleanPath(originalFilename);
         String extension = getFileExtension(name);
-        String extensions = "jpeg,png,jpg";
+        if (extension == null || extension.isEmpty()) {
+            extension = "jpg";
+        }
+        String extensions = "jpeg,png,jpg,webp,gif";
         if (!extensions.contains(extension.toLowerCase())) {
             log.error("Invalid File Extension {}", extension);
         }
         imageRes.setFileName(Calendar.getInstance().getTimeInMillis() + "." + extension);
-        file = new File(writePath + imageRes.getFileName());
+
+        File destFile = new File(uploadDir, imageRes.getFileName()).getAbsoluteFile();
+        if (destFile.getParentFile() != null && !destFile.getParentFile().exists()) {
+            destFile.getParentFile().mkdirs();
+        }
+
         FileImageDetail fileImageDetail = new FileImageDetail();
         try {
-            files.transferTo(file);
-            if (!files.isEmpty()) {
-                fileImageDetail.setFilePath(file.getPath());
-                fileImageDetail.setFileType(files.getContentType());
-                fileImageDetail.setFileName(imageRes.getFileName());
-                fileImageDetail.setOriginalFileName(getFileNoExtension(name));
-                fileImageDetail.setFileSize(files.getSize());
-                fileImageDetail.setStatus(Constants.STATUS_ACTIVE);
-                fileImageDetailRepository.save(fileImageDetail);
-            }
+            files.transferTo(destFile.toPath());
+            fileImageDetail.setFilePath(destFile.getAbsolutePath());
+            fileImageDetail.setFileType(files.getContentType());
+            fileImageDetail.setFileName(imageRes.getFileName());
+            fileImageDetail.setOriginalFileName(getFileNoExtension(name));
+            fileImageDetail.setFileSize(files.getSize());
+            fileImageDetail.setStatus(Constants.STATUS_ACTIVE);
+            fileImageDetailRepository.save(fileImageDetail);
+            log.info("Successfully uploaded image to: {}", destFile.getAbsolutePath());
         } catch (IOException e) {
             log.error("upload file fail", e);
-        }finally {
-            log.info("Final exception {}", fileImageDetail);
+        } finally {
+            log.info("Final uploaded image detail: {}", fileImageDetail);
         }
         imageRes.setFileName(fileImageDetail.getFileName());
         return imageRes;
@@ -86,7 +93,20 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Override
     public FileImageDetail findImageByFileName(String filename) {
-        return fileImageDetailRepository.findByFileNameAndStatus(filename, Constants.STATUS_ACTIVE);
+        FileImageDetail detail = fileImageDetailRepository.findByFileNameAndStatus(filename, Constants.STATUS_ACTIVE);
+        if (detail == null) {
+            try {
+                File uploadDir = new File(serverPath).getAbsoluteFile();
+                File fallbackFile = new File(uploadDir, filename).getAbsoluteFile();
+                if (fallbackFile.exists() && fallbackFile.isFile()) {
+                    detail = new FileImageDetail();
+                    detail.setFilePath(fallbackFile.getAbsolutePath());
+                    detail.setFileName(filename);
+                    detail.setStatus(Constants.STATUS_ACTIVE);
+                }
+            } catch (Exception ignored) {}
+        }
+        return detail;
     }
 
 }

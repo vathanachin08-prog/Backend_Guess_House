@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -84,6 +85,54 @@ public class UserController {
             return new ResponseEntity<>(messageRes, HttpStatus.INTERNAL_SERVER_ERROR);
         } finally {
             log.info("Update user req final result {}", messageRes);
+        }
+    }
+
+    @Operation(summary = "Get current user profile", description = "Get profile info of the authenticated user")
+    @GetMapping("/me")
+    public ResponseEntity<MessageRes> getMe() {
+        messageRes = new MessageRes();
+        try {
+            User user = authenticationUtilService.checkUser();
+            if (user == null) {
+                messageRes.getUserNotFound();
+                return new ResponseEntity<>(messageRes, HttpStatus.BAD_GATEWAY);
+            }
+            user.setPassword("******");
+            messageRes.setMessageSuccess(user);
+            return new ResponseEntity<>(messageRes, HttpStatus.OK);
+        } catch (Throwable e) {
+            log.error("Error get current user", e);
+            messageRes.internalServerError(null);
+            return new ResponseEntity<>(messageRes, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Operation(summary = "Update user avatar", description = "Update the avatar filename for the authenticated user")
+    @PostMapping("/avatar")
+    public ResponseEntity<MessageRes> updateAvatar(@RequestBody Map<String, String> body) {
+        messageRes = new MessageRes();
+        try {
+            User user = authenticationUtilService.checkUser();
+            if (user == null) {
+                messageRes.getUserNotFound();
+                return new ResponseEntity<>(messageRes, HttpStatus.BAD_GATEWAY);
+            }
+            String fileName = body.get("fileName");
+            if (fileName == null || fileName.trim().isEmpty()) {
+                messageRes.badRequest("fileName is required");
+                return new ResponseEntity<>(messageRes, HttpStatus.BAD_REQUEST);
+            }
+            user.setProfile(fileName.trim());
+            userRepository.save(user);
+            user.setPassword("******");
+            messageRes.setMessageCreateSuccess("Avatar updated successfully");
+            messageRes.setData(user);
+            return new ResponseEntity<>(messageRes, HttpStatus.OK);
+        } catch (Throwable e) {
+            log.error("Error updating avatar", e);
+            messageRes.internalServerError(null);
+            return new ResponseEntity<>(messageRes, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
