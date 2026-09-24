@@ -8,5 +8,6 @@ import com.dinsaren.springbootjwtapi.payload.response.FavoriteResponse;
 public interface FavoriteService {
     FavoriteResponse addFavorite(CreateFavoriteRequest req) throws AppException;
     void removeFavorite(Long id) throws AppException;
+    void removeFavoriteByProperty(Long propertyId) throws AppException;
     PageRes<FavoriteResponse> getMyFavorites(int page, int size) throws AppException;
 }

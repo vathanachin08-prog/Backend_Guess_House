@@ -67,6 +67,24 @@ public class FavoriteController {
         }
     }
 
+    @Operation(summary = "Remove favorite by property ID", description = "Remove an item from favorites by property ID")
+    @DeleteMapping("/property/{propertyId}")
+    public ResponseEntity<MessageRes> removeFavoriteByProperty(@PathVariable Long propertyId) {
+        MessageRes res = new MessageRes();
+        try {
+            favoriteService.removeFavoriteByProperty(propertyId);
+            res.setSuccess("Favorite removed successfully");
+            return ResponseEntity.ok(res);
+        } catch (AppException e) {
+            return ResponseEntity.status(e.getHttpStatus())
+                    .body(new MessageRes(e.getErrorCode(), e.getMessage(), null));
+        } catch (Exception e) {
+            log.error("Error removing favorite for property " + propertyId, e);
+            res.setInternalServer();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
+        }
+    }
+
     @Operation(summary = "Get my favorites", description = "List all favorites saved by the current student")
     @GetMapping
     public ResponseEntity<MessageRes> getMyFavorites(

@@ -22,6 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -46,8 +48,10 @@ public class FavoriteServiceImpl implements FavoriteService {
             property = propertyRepository.findById(req.getPropertyId())
                     .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Property not found"));
 
-            if (favoriteRepository.existsByStudentIdAndPropertyId(currentUser.getId(), req.getPropertyId())) {
-                throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.DUPLICATE_FAVORITE, "Property is already in favorites");
+            Optional<Favorite> existing = favoriteRepository.findByStudentIdAndPropertyId(currentUser.getId(), req.getPropertyId());
+            if (existing.isPresent()) {
+                log.info("Property {} is already in favorites for student {}, returning existing favorite", req.getPropertyId(), currentUser.getUsername());
+                return FavoriteResponse.fromEntity(existing.get());
             }
         }
 
@@ -56,8 +60,10 @@ public class FavoriteServiceImpl implements FavoriteService {
             room = roomRepository.findById(req.getRoomId())
                     .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Room not found"));
 
-            if (favoriteRepository.existsByStudentIdAndRoomId(currentUser.getId(), req.getRoomId())) {
-                throw new AppException(HttpStatus.BAD_REQUEST, ErrorCode.DUPLICATE_FAVORITE, "Room is already in favorites");
+            Optional<Favorite> existingRoom = favoriteRepository.findByStudentIdAndRoomId(currentUser.getId(), req.getRoomId());
+            if (existingRoom.isPresent()) {
+                log.info("Room {} is already in favorites for student {}, returning existing favorite", req.getRoomId(), currentUser.getUsername());
+                return FavoriteResponse.fromEntity(existingRoom.get());
             }
         }
 
@@ -76,6 +82,17 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         favoriteRepository.delete(favorite);
         log.info("Favorite {} deleted for student {}", id, currentUser.getUsername());
+    }
+
+    @Override
+    @Transactional
+    public void removeFavoriteByProperty(Long propertyId) throws AppException {
+        User currentUser = rentalAccessService.getCurrentUser();
+        Optional<Favorite> fav = favoriteRepository.findByStudentIdAndPropertyId(currentUser.getId(), propertyId);
+        if (fav.isPresent()) {
+            favoriteRepository.delete(fav.get());
+            log.info("Favorite for property {} deleted for student {}", propertyId, currentUser.getUsername());
+        }
     }
 
     @Override
