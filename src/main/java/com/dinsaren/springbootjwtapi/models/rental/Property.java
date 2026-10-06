@@ -61,7 +61,7 @@ public class Property extends BaseEntity {
     @Column(name = "verification_status", length = 50, nullable = false)
     private PropertyVerificationStatus verificationStatus = PropertyVerificationStatus.PENDING;
 
-    @Column(name = "main_image", length = 500)
+    @Column(name = "main_image", columnDefinition = "TEXT")
     private String mainImage;
 
     @Column(columnDefinition = "TEXT")

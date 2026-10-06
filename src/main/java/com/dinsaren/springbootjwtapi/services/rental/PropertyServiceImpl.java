@@ -54,8 +54,8 @@ public class PropertyServiceImpl implements PropertyService {
         property.setDistrict(req.getDistrict());
         property.setLatitude(req.getLatitude());
         property.setLongitude(req.getLongitude());
-        property.setStatus(PropertyStatus.DRAFT);
-        property.setVerificationStatus(PropertyVerificationStatus.PENDING);
+        property.setStatus(PropertyStatus.PUBLISHED);
+        property.setVerificationStatus(PropertyVerificationStatus.VERIFIED);
         property.setMainImage(req.getMainImage());
         property.setImages(req.getImages());
         property.setCreateAt(new Date());

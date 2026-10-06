@@ -86,6 +86,7 @@ public class WebSecurityConfig {
                                 "/error",
                                 "/api/oauth/**",
                                 "/api/public/**",
+                                "/app/public/**",
                                 "/openapi/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
