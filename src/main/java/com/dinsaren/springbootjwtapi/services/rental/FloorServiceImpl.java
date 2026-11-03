@@ -48,10 +48,10 @@ public class FloorServiceImpl implements FloorService {
             int occupied = 0;
             for (Room room : rooms) {
                 boolean match = false;
-                if (room.getFloor() != null && floor.getFloorOrder() != null && room.getFloor().equals(floor.getFloorOrder())) {
-                    match = true;
-                } else if (floor.getName() != null && floor.getName().contains(String.valueOf(room.getFloor()))) {
-                    match = true;
+                if (room.getFloor() != null && floor.getFloorOrder() != null) {
+                    match = room.getFloor().equals(floor.getFloorOrder());
+                } else if (room.getFloor() != null && floor.getId() != null) {
+                    match = room.getFloor().equals(floor.getId().intValue());
                 }
 
                 if (match) {
