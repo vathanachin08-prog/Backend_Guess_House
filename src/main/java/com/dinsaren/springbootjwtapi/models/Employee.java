@@ -31,13 +31,14 @@ public class Employee extends BaseEntity {
     @Column(nullable = false)
     private String department;
 
-    @Column(nullable = false)
-    private double salary;
+    @Column(name = "salary")
+    @Builder.Default
+    private Double salary = 0.0;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Column(name = "status")
+    @Builder.Default
+    private String status = "ACT";
 
     @Column(name = "profile_image")
     private String profileImage;
 }
-

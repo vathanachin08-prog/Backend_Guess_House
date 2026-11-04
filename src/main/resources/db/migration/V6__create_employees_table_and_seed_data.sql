@@ -30,16 +30,16 @@ VALUES
 ON CONFLICT (email) DO NOTHING;
 
 -- Seed product categories if empty
-INSERT INTO product_categories (name, status, created_at, created_by)
-SELECT 'Electronics', 'ACT', NOW(), 'system'
+INSERT INTO product_categories (name, created_at, created_by)
+SELECT 'Electronics', NOW(), 'system'
 WHERE NOT EXISTS (SELECT 1 FROM product_categories WHERE name = 'Electronics');
 
-INSERT INTO product_categories (name, status, created_at, created_by)
-SELECT 'Accessories', 'ACT', NOW(), 'system'
+INSERT INTO product_categories (name, created_at, created_by)
+SELECT 'Accessories', NOW(), 'system'
 WHERE NOT EXISTS (SELECT 1 FROM product_categories WHERE name = 'Accessories');
 
-INSERT INTO product_categories (name, status, created_at, created_by)
-SELECT 'Office', 'ACT', NOW(), 'system'
+INSERT INTO product_categories (name, created_at, created_by)
+SELECT 'Office', NOW(), 'system'
 WHERE NOT EXISTS (SELECT 1 FROM product_categories WHERE name = 'Office');
 
 -- Seed products if empty

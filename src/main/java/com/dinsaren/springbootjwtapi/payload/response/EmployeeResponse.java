@@ -20,7 +20,7 @@ public class EmployeeResponse {
     private String phone;
     private String position;
     private String department;
-    private double salary;
+    private Double salary;
     private String status;
     private String profileImage;
     private Date createdAt;
@@ -35,12 +35,11 @@ public class EmployeeResponse {
                 .phone(entity.getPhone())
                 .position(entity.getPosition())
                 .department(entity.getDepartment())
-                .salary(entity.getSalary())
-                .status(entity.getStatus())
+                .salary(entity.getSalary() != null ? entity.getSalary() : 0.0)
+                .status(entity.getStatus() != null ? entity.getStatus() : "ACT")
                 .profileImage(entity.getProfileImage())
                 .createdAt(entity.getCreateAt())
                 .updatedAt(entity.getUpdateAt())
                 .build();
     }
 }
-

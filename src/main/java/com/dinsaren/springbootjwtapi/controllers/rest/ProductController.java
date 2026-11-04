@@ -18,12 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -43,8 +38,9 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "List returned successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @GetMapping({"/category", "/category/list"})
     @PostMapping("/category/list")
-    public ResponseEntity<Object> getAll(@RequestBody BasePostReq req) {
+    public ResponseEntity<Object> getAll(@RequestBody(required = false) BasePostReq req) {
         try {
             List<ProductCategory> brands = productCategoryRepository.findAll();
             messageRes = new MessageRes();
@@ -153,12 +149,12 @@ public class ProductController {
     @GetMapping({"", "/list"})
     public ResponseEntity<Object> getProducts() {
         try {
-            List<Product> list = productRepository.findAllByStatusInOrderByIdDesc(List.of(Constants.STATUS_ACTIVE));
+            List<Product> list = productRepository.findAll();
             messageRes = new MessageRes();
             messageRes.setSuccess(list);
             return new ResponseEntity<>(messageRes, HttpStatus.OK);
         } catch (Throwable e) {
-            log.error("Error get all products: {}", e.toString());
+            log.error("Error get all products from database: {}", e.toString());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
