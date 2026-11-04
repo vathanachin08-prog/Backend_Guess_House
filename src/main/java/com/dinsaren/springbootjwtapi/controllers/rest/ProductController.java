@@ -150,23 +150,33 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "List returned successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+    @GetMapping({"", "/list"})
+    public ResponseEntity<Object> getProducts() {
+        try {
+            List<Product> list = productRepository.findAllByStatusInOrderByIdDesc(List.of(Constants.STATUS_ACTIVE));
+            messageRes = new MessageRes();
+            messageRes.setSuccess(list);
+            return new ResponseEntity<>(messageRes, HttpStatus.OK);
+        } catch (Throwable e) {
+            log.error("Error get all products: {}", e.toString());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/list")
-    public ResponseEntity<Object> getAllProducts(@RequestBody BasePostReq req) {
+    public ResponseEntity<Object> getAllProducts(@RequestBody(required = false) BasePostReq req) {
         try {
             List<String> stringList = new ArrayList<>();
-            if (req.getStatus().equals("ALL")) {
+            String status = req != null ? req.getStatus() : null;
+            if ("ALL".equalsIgnoreCase(status)) {
                 stringList.add(Constants.STATUS_ACTIVE);
                 stringList.add(Constants.STATUS_DELETE);
-                List<Product> list = productRepository.findAllByStatusInOrderByIdDesc(stringList);
-                messageRes = new MessageRes();
-                messageRes.setSuccess(list);
-            }
-            if (req.getStatus() == null) {
+            } else {
                 stringList.add(Constants.STATUS_ACTIVE);
-                List<Product> list = productRepository.findAllByStatusInOrderByIdDesc(stringList);
-                messageRes = new MessageRes();
-                messageRes.setSuccess(list);
             }
+            List<Product> list = productRepository.findAllByStatusInOrderByIdDesc(stringList);
+            messageRes = new MessageRes();
+            messageRes.setSuccess(list);
             return new ResponseEntity<>(messageRes, HttpStatus.OK);
         } catch (Throwable e) {
             log.error("Error internal error get all product by user id {}", e.toString());
