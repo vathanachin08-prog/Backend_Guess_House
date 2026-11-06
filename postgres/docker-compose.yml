@@ -1,17 +1,22 @@
-version: '3.9'
 services:
   postgres:
     image: postgres:17-alpine
     restart: always
     container_name: postgres-content-management-service
     ports:
-      - 54322:5432
+      - "5433:5432"
     environment:
       - POSTGRES_PASSWORD=1234
       - POSTGRES_USER=postgres
       - POSTGRES_DB=room_rental_db
+    volumes:
+      - 28b134e1742c2ec535df3c56d10bd15b2e0ab34aa6efece5c09a77fdf0a15210:/var/lib/postgresql/data
     networks:
       - cf-cms-service
+
+volumes:
+  28b134e1742c2ec535df3c56d10bd15b2e0ab34aa6efece5c09a77fdf0a15210:
+    external: true
 
 networks:
   cf-cms-service:
