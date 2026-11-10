@@ -112,6 +112,17 @@ public class AuthController {
             messageRes.badRequest("Error: Invalid username and password");
             return new ResponseEntity<>(messageRes, HttpStatus.BAD_REQUEST);
         }
+
+        // Check if account is an Owner account pending Web Admin approval
+        Optional<User> checkPending = userRepository.findByUsername(req.getPhoneNumber());
+        if (!checkPending.isPresent()) {
+            checkPending = userRepository.findByPhoneNumber(req.getPhoneNumber());
+        }
+        if (checkPending.isPresent() && "PEN".equalsIgnoreCase(checkPending.get().getStatus())) {
+            messageRes.badRequest("គណនីម្ចាស់ផ្ទះរបស់អ្នកកំពុងស្ថិតក្នុងការត្រួតពិនិត្យ និងរង់ចាំការអនុម័តពី Admin (Web Admin Approval)។ សូមរង់ចាំការអនុម័ត!");
+            return new ResponseEntity<>(messageRes, HttpStatus.FORBIDDEN);
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getPhoneNumber(), req.getPassword()));
 
@@ -350,11 +361,23 @@ public class AuthController {
             user.setRoles(roles);
             user.setFirstName(req.getFirstName());
             user.setLastName(req.getLastName());
-            user.setStatus(Constants.STATUS_ACTIVE);
+
+            boolean isOwner = "OWNER".equalsIgnoreCase(req.getRole()) || "ROLE_OWNER".equalsIgnoreCase(req.getRole());
+            if (isOwner) {
+                user.setStatus("PEN"); // Pending approval by web admin!
+            } else {
+                user.setStatus(Constants.STATUS_ACTIVE);
+            }
+
             user.setChangePassword(Constants.No);
             user.setProfile(req.getProfile());
             userRepository.save(user);
-            messageRes.setMessageCreateSuccess("User Open Account successfully!");
+
+            if (isOwner) {
+                messageRes.setMessageCreateSuccess("Owner account registered successfully and is pending approval by Web Admin!");
+            } else {
+                messageRes.setMessageCreateSuccess("User Open Account successfully!");
+            }
             return new ResponseEntity<>(messageRes, HttpStatus.OK);
         } catch (Throwable e) {
             log.info("Error open account req ", e);

@@ -112,17 +112,22 @@ public class UserManagementController {
             User user = new User(req.getUsername(), req.getEmail(), encoder.encode(req.getPassword()), req.getPhoneNumber());
             Set<Role> roles = new HashSet<>();
             Role role = null;
-            if (req.getRole().equals(UserRole.ROLE_USER) || req.getRole().equals("USER")) {
-                role = roleRepository.findByName(UserRole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            String roleReq = req.getRole() != null ? req.getRole().toString().toUpperCase() : "USER";
+            if (roleReq.contains("OWNER")) {
+                role = roleRepository.findByName(UserRole.ROLE_OWNER).orElse(null);
+            } else if (roleReq.contains("ADMIN")) {
+                role = roleRepository.findByName(UserRole.ROLE_ADMIN).orElse(null);
+            } else if (roleReq.contains("STUDENT")) {
+                role = roleRepository.findByName(UserRole.ROLE_STUDENT).orElse(null);
             }
-            if (req.getRole().equals(UserRole.ROLE_ADMIN) || req.getRole().equals("ADMIN")) {
-                role = roleRepository.findByName(UserRole.ROLE_ADMIN).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            if (role == null) {
+                role = roleRepository.findByName(UserRole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             }
             roles.add(role);
             user.setRoles(roles);
             user.setFirstName(req.getFirstName());
             user.setLastName(req.getLastName());
-            user.setStatus(Constants.STATUS_ACTIVE);
+            user.setStatus(req.getStatus() != null && !req.getStatus().isEmpty() ? req.getStatus() : Constants.STATUS_ACTIVE);
             user.setChangePassword(Constants.No);
             user.setProfile(req.getProfile());
             user.setPassword(encoder.encode(req.getPassword()));
@@ -180,13 +185,18 @@ public class UserManagementController {
             user.setLastName(req.getLastName());
             Set<Role> roles = new HashSet<>();
             Role role = null;
-            if (req.getRole().equals(UserRole.ROLE_USER) || req.getRole().equals("USER")) {
+            String roleReq = req.getRole() != null ? req.getRole().toString().toUpperCase() : "USER";
+            if (roleReq.contains("OWNER")) {
+                role = roleRepository.findByName(UserRole.ROLE_OWNER).orElse(null);
+            } else if (roleReq.contains("ADMIN")) {
+                role = roleRepository.findByName(UserRole.ROLE_ADMIN).orElse(null);
+            } else if (roleReq.contains("STUDENT")) {
+                role = roleRepository.findByName(UserRole.ROLE_STUDENT).orElse(null);
+            }
+            if (role == null) {
                 role = roleRepository.findByName(UserRole.ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             }
-            if (req.getRole().equals(UserRole.ROLE_ADMIN) || req.getRole().equals("ADMIN")) {
-                role = roleRepository.findByName(UserRole.ROLE_ADMIN).orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            }
-            if (!req.getPassword().equals(user.getPassword())) {
+            if (req.getPassword() != null && !req.getPassword().isEmpty() && !req.getPassword().equals(user.getPassword())) {
                 user.setPassword(encoder.encode(req.getPassword()));
             }
             roles.add(role);
